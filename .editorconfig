@@ -1,0 +1,46 @@
+
+[*]
+
+# Microsoft .NET properties
+csharp_indent_braces = false
+csharp_new_line_before_open_brace = all
+csharp_preserve_single_line_blocks = true
+csharp_style_var_elsewhere = false:warning
+csharp_style_var_for_built_in_types = false:warning
+csharp_style_var_when_type_is_apparent = false:warning
+
+# ReSharper properties
+resharper_align_linq_query = true
+resharper_align_multiline_calls_chain = true
+resharper_align_multiline_extends_list = true
+resharper_align_multiline_parameter = true
+resharper_align_multiline_switch_expression = true
+resharper_blank_lines_around_single_line_auto_property = 1
+resharper_blank_lines_around_single_line_property = 1
+resharper_csharp_blank_lines_around_single_line_invocable = 1
+resharper_csharp_int_align_fix_in_adjacent = false
+resharper_csharp_keep_blank_lines_in_code = 1
+resharper_csharp_keep_blank_lines_in_declarations = 1
+resharper_csharp_keep_existing_enum_arrangement = false
+resharper_csharp_stick_comment = false
+resharper_csharp_wrap_parameters_style = chop_if_long
+resharper_empty_block_style = together_same_line
+resharper_indent_primary_constructor_decl_pars = outside
+resharper_keep_existing_declaration_block_arrangement = false
+resharper_keep_existing_declaration_parens_arrangement = false
+resharper_keep_existing_embedded_arrangement = false
+resharper_keep_existing_embedded_block_arrangement = false
+resharper_keep_existing_invocation_parens_arrangement = false
+resharper_keep_existing_list_patterns_arrangement = false
+resharper_keep_existing_primary_constructor_declaration_parens_arrangement = true
+resharper_keep_existing_property_patterns_arrangement = false
+resharper_keep_existing_switch_expression_arrangement = false
+resharper_outdent_binary_ops = true
+resharper_outdent_commas = true
+resharper_outdent_dots = true
+resharper_place_simple_embedded_statement_on_same_line = false
+resharper_prefer_separate_deconstructed_variables_declaration = true
+resharper_wrap_comments = true
+
+# ReSharper inspection severities
+resharper_arrange_var_keywords_in_deconstructing_declaration_highlighting = warning

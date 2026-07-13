@@ -4,155 +4,121 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace ThemeConverter
+namespace ThemeConverter;
+
+internal static class ParseMapping
 {
-    internal class ParseMapping
+    private const string TokenColorsName = "tokenColors";
+    private const string VscTokenName = "VSC Token";
+    private const string VsTokenName = "VS Token";
+    private const string TokenMappingFileName = "TokenMappings.json";
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        private static Dictionary<string, ColorKey[]> ScopeMappings = new Dictionary<string, ColorKey[]>();
-        private static Dictionary<string, string> CategoryGuids = new Dictionary<string, string>();
-        private static Dictionary<string, string> VSCTokenFallback = new Dictionary<string, string>();
-        private static Dictionary<string, (float, string)> OverlayMapping = new Dictionary<string, (float, string)>();
-        private static List<string> MappedVSTokens = new List<string>();
-        private const string TokenColorsName = "tokenColors";
-        private const string VSCTokenName = "VSC Token";
-        private const string VSTokenName = "VS Token";
-        private const string TokenMappingFileName = "TokenMappings.json";
+        AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Skip, WriteIndented = true
+    };
 
-        public static void CheckDuplicateMapping(Action<string> reportFunc)
+    public static void CheckDuplicateMapping(Action<string> reportFunc)
+    {
+        TokenMappingFile file = DeserializeRequired<TokenMappingFile>(TokenMappingFileName);
+
+        HashSet<string> mappedVsTokens = new(StringComparer.Ordinal);
+
+        foreach (TokenMapping color in file.TokenColors)
         {
-            var contents = System.IO.File.ReadAllText(TokenMappingFileName);
-            var file = JObject.Parse(contents);
-            var colors = file[TokenColorsName];
-
-            var addedMappings = new List<string>();
-
-            foreach (var color in colors)
+            foreach (string vsToken in color.VsTokens.Where(vsToken => !mappedVsTokens.Add(vsToken)))
             {
-                var VSCToken = color[VSCTokenName];
-                string key = VSCToken.ToString();
-
-                var VSTokens = color[VSTokenName];
-
-                foreach (var VSToken in VSTokens)
-                {
-                    if (addedMappings.Contains(VSToken.ToString()))
-                    {
-                        reportFunc(key + ": " + VSToken.ToString());
-                    }
-                    else
-                    {
-                        addedMappings.Add(VSToken.ToString());
-                    }
-                }
+                reportFunc(color.VscToken + ": " + vsToken);
             }
         }
+    }
 
-        public static Dictionary<string, ColorKey[]> CreateScopeMapping()
+    public static Dictionary<string, ColorKey[]> CreateScopeMapping()
+    {
+        TokenMappingFile file = DeserializeRequired<TokenMappingFile>(TokenMappingFileName);
+        Dictionary<string, ColorKey[]> scopeMappings = new(StringComparer.Ordinal);
+        foreach (TokenMapping color in file.TokenColors)
         {
-            var contents = System.IO.File.ReadAllText(TokenMappingFileName);
-
-            // JObject.Parse will skip JSON comments by default
-            var file = JObject.Parse(contents);
-
-            var colors = file[TokenColorsName];
-            foreach (var color in colors)
+            List<ColorKey> values = [];
+            foreach (ColorKey newColorKey in color.VsTokens.Select(vsToken => vsToken.Split("&")).Select(colorKey =>
+                         colorKey.Length switch
+                         {
+                             2 => // category & token name (by default foreground)
+                                 new ColorKey(colorKey[0], colorKey[1], "Foreground"),
+                             3 => // category & token name & aspect
+                                 new ColorKey(colorKey[0], colorKey[1], colorKey[2]),
+                             4 => // category & token name & vsc opacity & vscode background
+                                 new ColorKey(colorKey[0], colorKey[1], "Foreground", colorKey[2], colorKey[3]),
+                             5 => // category & token name & aspect & vsc opacity & vscode background
+                                 new ColorKey(colorKey[0], colorKey[1], colorKey[2], colorKey[3], colorKey[4]),
+                             _ => throw new InvalidDataException(
+                                 "A token mapping must contain between two and five '&'-delimited fields.")
+                         }))
             {
-                var VSCToken = color[VSCTokenName];
-                string key = VSCToken.ToString();
-
-                var VSTokens = color[VSTokenName];
-                List<ColorKey> values = new List<ColorKey>();
-                foreach (var VSToken in VSTokens)
-                {
-                    string[] colorKey = VSToken.ToString()?.Split("&");
-                    ColorKey newColorKey;
-                    switch(colorKey.Length)
-                    {
-                        case 2: // category & token name (by default foreground)
-                            newColorKey = new ColorKey(colorKey[0], colorKey[1], "Foreground");
-                            break;
-                        case 3: // category & token name & aspect
-                            newColorKey = new ColorKey(colorKey[0], colorKey[1], colorKey[2]);
-                            break;
-                        case 4: // category & token name & vsc opacity & vscode background
-                            newColorKey = new ColorKey(colorKey[0], colorKey[1], "Foreground", colorKey[2], colorKey[3]);
-                            break;
-                        case 5: // category & token name & aspect & vsc opacity & vscode background
-                            newColorKey = new ColorKey(colorKey[0], colorKey[1], colorKey[2], colorKey[3], colorKey[4]);
-                            break;
-                        default:
-                            throw new Exception("Invalid mapping format");
-                    }
-
-                    values.Add(newColorKey);
-                    MappedVSTokens.Add(string.Format("{0}&{1}&{2}", newColorKey.CategoryName, newColorKey.KeyName, newColorKey.Aspect));
-                }
-
-                ScopeMappings.Add(key, values.ToArray());
+                values.Add(newColorKey);
             }
 
-            CheckForMissingVSTokens();
-
-            return ScopeMappings;
+            scopeMappings.Add(color.VscToken, [.. values]);
         }
 
-        private static void CheckForMissingVSTokens()
-        {
-            if (MappedVSTokens.Count > 0)
-            {
-                var text = File.ReadAllText("VSTokens.json");
-                var jobject = JArray.Parse(text);
-                var availableTokens = jobject.ToObject<List<string>>();
+        return scopeMappings;
+    }
 
-                var missingVSTokens = new List<string>();
+    public static Dictionary<string, string> CreateCategoryGuids()
+    {
+        return DeserializeRequired<Dictionary<string, string>>("CategoryGuid.json");
+    }
 
-                foreach (var token in availableTokens)
-                {
-                    if (!MappedVSTokens.Contains(token))
-                    {
-                        missingVSTokens.Add(token);
-                    }
-                }
+    public static Dictionary<string, string> CreateVscTokenFallback()
+    {
+        return DeserializeRequired<Dictionary<string, string>>("VSCTokenFallback.json");
+    }
 
-                string json = JsonConvert.SerializeObject(missingVSTokens, Formatting.Indented);
-                File.WriteAllText("MissingVSTokens.json", json);
-            }
-        }
+    public static Dictionary<string, (float, string)> CreateOverlayMapping()
+    {
+        Dictionary<string, OverlayMappingValue> values =
+            DeserializeRequired<Dictionary<string, OverlayMappingValue>>("OverlayMapping.json");
+        return values.ToDictionary(item => item.Key, item => (item.Value.Opacity, item.Value.Background),
+            StringComparer.Ordinal);
+    }
 
-        public static Dictionary<string, string> CreateCategoryGuids()
-        {
-            var contents = System.IO.File.ReadAllText("CategoryGuid.json");
-            var file = JsonConvert.DeserializeObject<JObject>(contents);
+    private static T DeserializeRequired<T>(string fileName)
+    {
+        string contents = File.ReadAllText(GetDataFilePath(fileName));
+        return JsonSerializer.Deserialize<T>(contents, JsonOptions) ??
+               throw new JsonException($"{fileName} does not contain the expected JSON structure.");
+    }
 
-            foreach (var item in file)
-            {
-                CategoryGuids.Add(item.Key, item.Value.ToString());
-            }
+    internal static string GetDataFilePath(string fileName)
+    {
+        return Path.Combine(AppContext.BaseDirectory, "Data", fileName);
+    }
 
-            return CategoryGuids;
-        }
+    private sealed record TokenMappingFile
+    {
+        [JsonPropertyName(TokenColorsName)]
+        public TokenMapping[] TokenColors { get; init; } = [];
+    }
 
-        public static Dictionary<string, string> CreateVSCTokenFallback()
-        {
-            var contents = System.IO.File.ReadAllText("VSCTokenFallback.json");
-            var file = JsonConvert.DeserializeObject<JObject>(contents);
+    private sealed record TokenMapping
+    {
+        [JsonPropertyName(VscTokenName)]
+        public required string VscToken { get; init; }
 
-            foreach (var item in file)
-            {
-                VSCTokenFallback.Add(item.Key, item.Value.ToString());
-            }
+        [JsonPropertyName(VsTokenName)]
+        public string[] VsTokens { get; init; } = [];
+    }
 
-            return VSCTokenFallback;
-        }
+    private sealed record OverlayMappingValue
+    {
+        [JsonPropertyName("Item1")]
+        public float Opacity { get; init; }
 
-        public static Dictionary<string, (float, string)> CreateOverlayMapping()
-        {
-            var contents = System.IO.File.ReadAllText("OverlayMapping.json");
-            OverlayMapping = JsonConvert.DeserializeObject<Dictionary<string, (float, string)>>(contents);
-            return OverlayMapping;
-        }
+        [JsonPropertyName("Item2")]
+        public required string Background { get; init; }
     }
 }

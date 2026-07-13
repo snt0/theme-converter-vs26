@@ -1,14 +1,13 @@
-﻿namespace ThemeConverter
+﻿
+using System.Text.Json.Serialization;
+
+namespace ThemeConverter.JSON;
+
+internal sealed record SettingsContract
 {
-    using System.Runtime.Serialization;
+    [JsonPropertyName("foreground")]
+    public string? Foreground { get; set; }
 
-    [DataContract]
-    internal class SettingsContract
-    {
-        [DataMember(Name = "foreground", IsRequired = false)]
-        public string Foreground { get; set; }
-
-        [DataMember(Name = "background", IsRequired = false)]
-        public string Background { get; set; }
-    }
+    [JsonPropertyName("background")]
+    public string? Background { get; set; }
 }

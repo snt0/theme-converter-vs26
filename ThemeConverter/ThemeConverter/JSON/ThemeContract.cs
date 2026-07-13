@@ -1,18 +1,29 @@
-﻿namespace ThemeConverter
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json.Serialization;
+
+namespace ThemeConverter.JSON;
+
+internal sealed record ThemeFileContract
 {
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
 
-    [DataContract]
-    internal class ThemeFileContract
+    [JsonPropertyName("colors")]
+    public Dictionary<string, string?>? Colors { get; set; }
+
+    [JsonIgnore]
+    public Dictionary<string, string?> ColorValues
     {
-        [DataMember(Name = "type")]
-        public string Type { get; set; }
+        get => Colors ??= [];
+    }
 
-        [DataMember(Name = "colors")]
-        public Dictionary<string, string> Colors { get; set; }
+    [JsonPropertyName("tokenColors")]
+    public RuleContract?[]? TokenColors { get; set; }
 
-        [DataMember(Name = "tokenColors")]
-        public RuleContract[] TokenColors { get; set; }
+    [JsonIgnore]
+    public IEnumerable<RuleContract> TokenColorRules
+    {
+        get => TokenColors?.OfType<RuleContract>() ?? [];
     }
 }

@@ -1,39 +1,37 @@
-﻿namespace ThemeConverter
+﻿using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace ThemeConverter.JSON;
+
+internal sealed record RuleContract
 {
-    using System;
-    using System.Runtime.Serialization;
-    using Newtonsoft.Json.Linq;
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
 
-    [DataContract]
-    internal class RuleContract
+    [JsonPropertyName("scope")]
+    public JsonElement Scope { get; set; }
+
+    [JsonPropertyName("settings")]
+    public SettingsContract? Settings { get; set; }
+
+    [JsonIgnore]
+    public SettingsContract ColorSettings
     {
-        [DataMember(Name = "name", IsRequired = false)]
-        public string Name { get; set; }
+        get => Settings ??= new SettingsContract();
+    }
 
-        [DataMember(Name = "scope", IsRequired = false)]
-        public JToken Scope { get; set; }
-
-        [DataMember(Name = "settings")]
-        public SettingsContract Settings { get; set; }
-
-        public string[] ScopeNames
+    public string[] ScopeNames
+    {
+        get
         {
-            get
-            {
-                try
-                {
-                    if (this.Scope is null)
-                    {
-                        return Array.Empty<string>();
-                    }
-
-                    return new[] { this.Scope.ToObject<string>() };
-                }
-                catch (Exception)
-                {
-                    return this.Scope.ToObject<string[]>();
-                }
-            }
+            return Scope.ValueKind switch
+                   {
+                       JsonValueKind.String => Scope.GetString() is { } scope ? [scope] : [],
+                       JsonValueKind.Array => [..(Scope.Deserialize<string?[]>() ?? []).OfType<string>()],
+                       JsonValueKind.Undefined or JsonValueKind.Null => [],
+                       _ => throw new JsonException("The scope property must be a string or an array of strings.")
+                   };
         }
     }
 }

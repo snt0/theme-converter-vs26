@@ -2,76 +2,32 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <TargetFramework>net10.0</TargetFramework>
     <Version Condition="'$(Version)'==''">0.1.0</Version>
-    <NoWarn>8002</NoWarn>
+    <Nullable>enable</Nullable>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>theme-converter</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageId>ThemeConverter.VS26</PackageId>
+    <Authors>snt0</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/snt0/theme-converter-vs26</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/snt0/theme-converter-vs26</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Convert Visual Studio Code themes into Visual Studio 26 pkgdef files.</Description>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SignType)'!=''">
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>True</DelaySign>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="0.4.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Mono.Options" Version="6.12.0.148" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.CodeDom" Version="5.0.0" />
-  </ItemGroup>  
-
-  <ItemGroup>
-    <Compile Update="Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>  
-
-  <ItemGroup>
-    <EmbeddedResource Update="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="OverlayMapping.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="Data\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CategoryGuid.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TokenMappings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="VSCTokenFallback.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="VSTokens.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <FilesToSign Include="$(OutputPath)\$(AssemblyName).dll">
-      <Authenticode>Microsoft400</Authenticode>
-      <StrongName>StrongName</StrongName>
-    </FilesToSign>
-    <FilesToSign Include="$(OutputPath)\$(AssemblyName).exe">
-      <Authenticode>Microsoft400</Authenticode>
-    </FilesToSign>
-    <FilesToSign Include="$(OutputPath)\Mono.Options.dll">
-      <Authenticode>3PartySHA2</Authenticode>
-    </FilesToSign>
-    <FilesToSign Include="$(OutputPath)\Newtonsoft.Json.dll">
-      <Authenticode>3PartySHA2</Authenticode>
-    </FilesToSign>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

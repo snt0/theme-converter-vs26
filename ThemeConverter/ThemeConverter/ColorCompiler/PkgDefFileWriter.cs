@@ -2,128 +2,116 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace ThemeConverter.ColorCompiler
+namespace ThemeConverter.ColorCompiler;
+
+internal sealed class PkgDefFileWriter : IAsyncDisposable
 {
-    internal class PkgDefFileWriter : IDisposable
+    private readonly StreamWriter _file;
+    private string _lastSectionWritten = string.Empty;
+
+    public PkgDefFileWriter(string filePath, bool overwriteExisting)
     {
-        private StreamWriter file;
-        private bool isOpen;
-        private string lastSectionWritten;
-        private bool disposedValue;
+        FileMode mode = overwriteExisting ? FileMode.Create : FileMode.Append;
+        FileStream stream = new(filePath, mode, FileAccess.Write, FileShare.Read, 4096, FileOptions.Asynchronous);
+        _file = new StreamWriter(stream, Encoding.UTF8);
+    }
 
-        private class Constants
+    private static class Constants
+    {
+        public const string SectionStartChar = @"[";
+        public const string SectionEndChar = @"]";
+        public const string BinaryPrefix = "hex:";
+    }
+
+    public async ValueTask WriteAsync(PkgDefItem item, CancellationToken cancellationToken)
+    {
+        if (item.SectionName is "" or null)
         {
-            public const string SectionStartChar = @"[";
-            public const string SectionEndChar = @"]";
-            public const string BinaryPrefix = "hex:";
+            return;
         }
 
-        public PkgDefFileWriter(string filePath, bool overwriteExisting)
+        if (item.SectionName != _lastSectionWritten)
         {
-            this.file = new StreamWriter(filePath, !overwriteExisting, System.Text.Encoding.UTF8);
-            this.isOpen = true;
-            this.lastSectionWritten = "";
-        }
-
-        public bool Write(PkgDefItem item)
-        {
-            if (!this.isOpen)
-                return false;
-
-            if ((item.SectionName == String.Empty) ||
-                (item.SectionName == null))
-                return false;
-
-            if (item.SectionName != this.lastSectionWritten)
+            if (_lastSectionWritten != string.Empty)
             {
-                if (this.lastSectionWritten != String.Empty)
-                {
-                    file.WriteLine();
-                }
-                string line = String.Format("{0}{1}{2}",
-                                            Constants.SectionStartChar,
-                                            item.SectionName,
-                                            Constants.SectionEndChar);
-                file.WriteLine(line);
-                this.lastSectionWritten = item.SectionName;
+                await _file.WriteLineAsync(ReadOnlyMemory<char>.Empty, cancellationToken);
             }
 
-            if ((item.ValueName != null) &&
-                (item.ValueName != String.Empty))
+            string line = $"{Constants.SectionStartChar}{item.SectionName}{Constants.SectionEndChar}";
+            await _file.WriteLineAsync(line.AsMemory(), cancellationToken);
+            _lastSectionWritten = item.SectionName;
+        }
+
+        if (string.IsNullOrEmpty(item.ValueName))
+        {
+            return;
+        }
+
+        {
+            if (item.ValueName == "@")
             {
-                if (item.ValueName == "@")
-                {
-                    file.Write(item.ValueName);
-                }
-                else
-                {
-                    string line = String.Format("\"{0}\"", item.ValueName);
-                    file.Write(line);
-                }
-
-                file.Write("=");
-
-                switch (item.ValueDataType)
-                {
-                    //Todo: catch invalid cast exceptions, report, and continue;
-                    case PkgDefValueType.PKGDEF_VALUE_STRING:
-                        {
-                            string line = String.Format("\"{0}\"", (string)item.ValueDataString);
-                            file.Write(line);
-                            break;
-                        }
-                    case PkgDefValueType.PKGDEF_VALUE_BINARY:
-                        {
-                            string line = String.Format("{0}{1}",
-                                                        Constants.BinaryPrefix,
-                                                        this.DataToHexString((byte[])item.ValueDataBinary, item.ValueDataBinaryLength));
-                            file.Write(line);
-                            break;
-                        }
-                }
-
-                file.WriteLine();
+                await _file.WriteAsync(item.ValueName.AsMemory(), cancellationToken);
+            }
+            else
+            {
+                string line = $"\"{item.ValueName}\"";
+                await _file.WriteAsync(line.AsMemory(), cancellationToken);
             }
 
-            return true;
-        }
+            await _file.WriteAsync("=".AsMemory(), cancellationToken);
 
-        private string DataToHexString(byte[] binaryData, int length)
-        {
-            if (!this.isOpen)
-                return null;
-
-            var dataString = new StringBuilder();
-            for (int i = 0; i < length; i++)
+            switch (item.ValueDataType)
             {
-                dataString.Append(binaryData[i].ToString("x2"));
-                dataString.Append(",");
-            }
-            return dataString.ToString().TrimEnd(',');
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
+                case PkgDefValueType.String:
                 {
-                    // Dispose managed resources
-                    this.file?.Dispose();
+                    string line = $"\"{item.ValueDataString}\"";
+                    await _file.WriteAsync(line.AsMemory(), cancellationToken);
+                    break;
+                }
+                case PkgDefValueType.Binary:
+                {
+                    string line = $"{Constants.BinaryPrefix}{DataToHexString(item.ValueDataBinary!)}";
+                    await _file.WriteAsync(line.AsMemory(), cancellationToken);
+                    break;
+                }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(item), item.ValueDataType,
+                        "ValueDataType was out of range");
+            }
+
+            await _file.WriteLineAsync(ReadOnlyMemory<char>.Empty, cancellationToken);
+        }
+    }
+
+    private static string DataToHexString(byte[] binaryData)
+    {
+        if (binaryData.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        return string.Create(binaryData.Length * 3 - 1, binaryData, static (destination, data) =>
+        {
+            for (int index = 0; index < data.Length; index++)
+            {
+                if (index > 0)
+                {
+                    destination[index * 3 - 1] = ',';
                 }
 
-                disposedValue = true;
+                data[index].TryFormat(destination.Slice(index * 3, 2), out _, "x2", CultureInfo.InvariantCulture);
             }
-        }
+        });
+    }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
+    public ValueTask DisposeAsync()
+    {
+        return _file.DisposeAsync();
     }
 }

@@ -16,9 +16,9 @@ namespace ThemeConverterTests
         [Fact]
         public void NoValidationError()
         {
-            var errors = new List<string>();
+            List<string> errors = [];
 
-            Converter.ValidateDataFiles((error) => errors.Add(error));
+            Converter.ValidateDataFiles(errors.Add);
 
             errors.Should().BeEmpty();
         }

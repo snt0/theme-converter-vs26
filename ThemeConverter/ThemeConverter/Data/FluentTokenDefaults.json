@@ -1,0 +1,494 @@
+{
+  "Shell": {
+    "AccentFillAlt": {
+      "Light": "FF3F3682",
+      "Dark": "FFD2CCF8"
+    },
+    "AccentFillDefault": {
+      "Light": "FF5649B0",
+      "Dark": "FF9184EE"
+    },
+    "AccentFillDisabled": {
+      "Light": "37000000",
+      "Dark": "28FFFFFF"
+    },
+    "AccentFillSecondary": {
+      "Light": "E55649B0",
+      "Dark": "E59184EE"
+    },
+    "AccentFillSelectedTextBackground": {
+      "Light": "FF0078D4",
+      "Dark": "FF005FB7"
+    },
+    "AccentFillSelectedTextBackgroundSubtle": {
+      "Light": "4D0078D4",
+      "Dark": "6660CDFF"
+    },
+    "AccentFillSenary": {
+      "Light": "1F5649B0",
+      "Dark": "1F9184EE"
+    },
+    "AccentFillTertiary": {
+      "Light": "CC5649B0",
+      "Dark": "CC9184EE"
+    },
+    "AccentTextFillDisabled": {
+      "Light": "5C000000",
+      "Dark": "5DFFFFFF"
+    },
+    "AccentTextFillPrimary": {
+      "Light": "FF3F3682",
+      "Dark": "FFD2CCF8"
+    },
+    "AccentTextFillSecondary": {
+      "Light": "FF221D46",
+      "Dark": "FFD2CCF8"
+    },
+    "AccentTextFillTertiary": {
+      "Light": "FF5649B0",
+      "Dark": "FFA79CF1"
+    },
+    "CardBackgroundFillDefault": {
+      "Light": "B2FFFFFF",
+      "Dark": "0DFFFFFF"
+    },
+    "CardBackgroundFillSecondary": {
+      "Light": "80F6F6F6",
+      "Dark": "08FFFFFF"
+    },
+    "CardBackgroundFillTertiary": {
+      "Light": "FFFFFFFF",
+      "Dark": "12FFFFFF"
+    },
+    "CardStrokeDefault": {
+      "Light": "0F000000",
+      "Dark": "1A000000"
+    },
+    "CardStrokeDefaultSolid": {
+      "Light": "FFEBEBEB",
+      "Dark": "FF1C1C1C"
+    },
+    "CardStrokeDefaultSolidAlt": {
+      "Light": "FFDADADA",
+      "Dark": "FF0A0A0A"
+    },
+    "ControlAltFillDisabled": {
+      "Light": "00FFFFFF",
+      "Dark": "00FFFFFF"
+    },
+    "ControlAltFillQuaternary": {
+      "Light": "18000000",
+      "Dark": "12FFFFFF"
+    },
+    "ControlAltFillSecondary": {
+      "Light": "06000000",
+      "Dark": "1A000000"
+    },
+    "ControlAltFillTertiary": {
+      "Light": "0F000000",
+      "Dark": "0BFFFFFF"
+    },
+    "ControlAltFillTransparent": {
+      "Light": "00FFFFFF",
+      "Dark": "00FFFFFF"
+    },
+    "ControlFillActiveInput": {
+      "Light": "FFFFFFFF",
+      "Dark": "B21E1E1E"
+    },
+    "ControlFillDefault": {
+      "Light": "B2FFFFFF",
+      "Dark": "0FFFFFFF"
+    },
+    "ControlFillDisabled": {
+      "Light": "4DF9F9F9",
+      "Dark": "0BFFFFFF"
+    },
+    "ControlFillQuaternary": {
+      "Light": "C2F3F3F3",
+      "Dark": "0FFFFFFF"
+    },
+    "ControlFillSecondary": {
+      "Light": "80F9F9F9",
+      "Dark": "15FFFFFF"
+    },
+    "ControlFillTertiary": {
+      "Light": "4DF9F9F9",
+      "Dark": "08FFFFFF"
+    },
+    "ControlFillTransparent": {
+      "Light": "00FFFFFF",
+      "Dark": "00FFFFFF"
+    },
+    "ControlOnImageFillDefault": {
+      "Light": "C9FFFFFF",
+      "Dark": "B21C1C1C"
+    },
+    "ControlOnImageFillDisabled": {
+      "Light": "00FFFFFF",
+      "Dark": "001E1E1E"
+    },
+    "ControlOnImageFillSecondary": {
+      "Light": "FFF3F3F3",
+      "Dark": "FF1A1A1A"
+    },
+    "ControlOnImageFillTertiary": {
+      "Light": "FFEBEBEB",
+      "Dark": "FF131313"
+    },
+    "ControlSolidFillDefault": {
+      "Light": "FFFFFFFF",
+      "Dark": "FF454545"
+    },
+    "ControlStrokeDefault": {
+      "Light": "0F000000",
+      "Dark": "12FFFFFF"
+    },
+    "ControlStrokeForStrongFillWhenOnImage": {
+      "Light": "59FFFFFF",
+      "Dark": "6B000000"
+    },
+    "ControlStrokeOnAccentDefault": {
+      "Light": "14FFFFFF",
+      "Dark": "14FFFFFF"
+    },
+    "ControlStrokeOnAccentDisabled": {
+      "Light": "0F000000",
+      "Dark": "33000000"
+    },
+    "ControlStrokeOnAccentSecondary": {
+      "Light": "66000000",
+      "Dark": "24000000"
+    },
+    "ControlStrokeOnAccentTertiary": {
+      "Light": "37000000",
+      "Dark": "37000000"
+    },
+    "ControlStrokeSecondary": {
+      "Light": "0F000000",
+      "Dark": "12FFFFFF"
+    },
+    "ControlStrokeTransparent": {
+      "Light": "00FFFFFF",
+      "Dark": "00FFFFFF"
+    },
+    "ControlStrongFillDefault": {
+      "Light": "72000000",
+      "Dark": "8BFFFFFF"
+    },
+    "ControlStrongFillDisabled": {
+      "Light": "51000000",
+      "Dark": "3FFFFFFF"
+    },
+    "ControlStrongStrokeDefault": {
+      "Light": "9C000000",
+      "Dark": "9AFFFFFF"
+    },
+    "ControlStrongStrokeDisabled": {
+      "Light": "37000000",
+      "Dark": "28FFFFFF"
+    },
+    "DividerStrokeDefault": {
+      "Light": "14000000",
+      "Dark": "15FFFFFF"
+    },
+    "FocusStrokeInner": {
+      "Light": "FFFFFFFF",
+      "Dark": "B2000000"
+    },
+    "FocusStrokeOuter": {
+      "Light": "E4000000",
+      "Dark": "FFFFFFFF"
+    },
+    "HyperlinkFillDisabled": {
+      "Light": "5C000000",
+      "Dark": "5DFFFFFF"
+    },
+    "HyperlinkFillPrimary": {
+      "Light": "FF003E92",
+      "Dark": "FF99EBFF"
+    },
+    "HyperlinkFillSecondary": {
+      "Light": "FF001A68",
+      "Dark": "FF60CDFF"
+    },
+    "HyperlinkFillTertiary": {
+      "Light": "FF005FB8",
+      "Dark": "E560CDFF"
+    },
+    "LayerFillAlt": {
+      "Light": "FFFFFFFF",
+      "Dark": "0EFFFFFF"
+    },
+    "LayerFillDefault": {
+      "Light": "80FFFFFF",
+      "Dark": "4D3A3A3A"
+    },
+    "SolidBackgroundFillBase": {
+      "Light": "FFF3F3F3",
+      "Dark": "FF202020"
+    },
+    "SolidBackgroundFillBaseAlt": {
+      "Light": "FFDADADA",
+      "Dark": "FF0A0A0A"
+    },
+    "SolidBackgroundFillSecondary": {
+      "Light": "FFEEEEEE",
+      "Dark": "FF1C1C1C"
+    },
+    "SolidBackgroundFillTertiary": {
+      "Light": "FFF9F9F9",
+      "Dark": "FF282828"
+    },
+    "SolidBackgroundFillQuaternary": {
+      "Light": "FFFFFFFF",
+      "Dark": "FF2C2C2C"
+    },
+    "SolidBackgroundFillQuinary": {
+      "Light": "FFFDFDFD",
+      "Dark": "FF333333"
+    },
+    "SolidBackgroundFillSenary": {
+      "Light": "FFFFFFFF",
+      "Dark": "FF373737"
+    },
+    "SurfaceBackgroundFillDefault": {
+      "Light": "FFF9F9F9",
+      "Dark": "FF2C2C2C"
+    },
+    "SurfaceStrokeDefault": {
+      "Light": "66757575",
+      "Dark": "66757575"
+    },
+    "SurfaceStrokeFlyout": {
+      "Light": "0F000000",
+      "Dark": "33000000"
+    },
+    "ShadowFlyout": {
+      "Light": "24000000",
+      "Dark": "42000000"
+    },
+    "SmokeFillDefault": {
+      "Light": "4D000000",
+      "Dark": "4D000000"
+    },
+    "SmokeFillInverse": {
+      "Light": "C9FFFFFF",
+      "Dark": "B21C1C1C"
+    },
+    "SubtleFillDisabled": {
+      "Light": "00000000",
+      "Dark": "00FFFFFF"
+    },
+    "SubtleFillSecondary": {
+      "Light": "0F000000",
+      "Dark": "0FFFFFFF"
+    },
+    "SubtleFillTertiary": {
+      "Light": "0A000000",
+      "Dark": "0BFFFFFF"
+    },
+    "SubtleFillTransparent": {
+      "Light": "00FFFFFF",
+      "Dark": "00FFFFFF"
+    },
+    "SystemFillAttention": {
+      "Light": "FF005FB7",
+      "Dark": "FF60CDFF"
+    },
+    "SystemFillAttentionBackground": {
+      "Light": "80F6F6F6",
+      "Dark": "08FFFFFF"
+    },
+    "SystemFillCaution": {
+      "Light": "FF9D5D00",
+      "Dark": "FFFCE100"
+    },
+    "SystemFillCautionBackground": {
+      "Light": "FFFFF4CE",
+      "Dark": "FF433519"
+    },
+    "SystemFillCritical": {
+      "Light": "FFC42B1C",
+      "Dark": "FFFF99A4"
+    },
+    "SystemFillCriticalBackground": {
+      "Light": "FFFDE7E9",
+      "Dark": "FF442726"
+    },
+    "SystemFillNeutral": {
+      "Light": "72000000",
+      "Dark": "8BFFFFFF"
+    },
+    "SystemFillNeutralBackground": {
+      "Light": "06000000",
+      "Dark": "08FFFFFF"
+    },
+    "SystemFillSolidAttentionBackground": {
+      "Light": "FFF7F7F7",
+      "Dark": "FF2E2E2E"
+    },
+    "SystemFillSolidNeutral": {
+      "Light": "FF8A8A8A",
+      "Dark": "FF8A8A8A"
+    },
+    "SystemFillSolidNeutralBackground": {
+      "Light": "FFF3F3F3",
+      "Dark": "FF2E2E2E"
+    },
+    "SystemFillSuccess": {
+      "Light": "FF0F7B0F",
+      "Dark": "FF6CCB5F"
+    },
+    "SystemFillSuccessBackground": {
+      "Light": "FFDFF6DD",
+      "Dark": "FF393D1B"
+    },
+    "TextFillDisabled": {
+      "Light": "5C000000",
+      "Dark": "5DFFFFFF"
+    },
+    "TextFillPrimary": {
+      "Light": "E4000000",
+      "Dark": "FFFFFFFF"
+    },
+    "TextFillSecondary": {
+      "Light": "9E000000",
+      "Dark": "C8FFFFFF"
+    },
+    "TextFillTertiary": {
+      "Light": "72000000",
+      "Dark": "8BFFFFFF"
+    },
+    "TextOnAccentFillDisabled": {
+      "Light": "B2FFFFFF",
+      "Dark": "80000000"
+    },
+    "TextOnAccentFillPrimary": {
+      "Light": "FFFFFFFF",
+      "Dark": "FF000000"
+    },
+    "TextOnAccentFillSecondary": {
+      "Light": "B2FFFFFF",
+      "Dark": "80000000"
+    },
+    "TextOnAccentFillSelectedText": {
+      "Light": "FFFFFFFF",
+      "Dark": "FFFFFFFF"
+    }
+  },
+  "ShellInternal": {
+    "EnvironmentBackground": {
+      "Light": "FFEEEEEE",
+      "Dark": "FF1C1C1C"
+    },
+    "EnvironmentBadge": {
+      "Light": "B2FFFFFF",
+      "Dark": "0FFFFFFF"
+    },
+    "EnvironmentBody": {
+      "Light": "FFEEEEEE",
+      "Dark": "FF1C1C1C"
+    },
+    "EnvironmentBodyText": {
+      "Light": "E4000000",
+      "Dark": "FFFFFFFF"
+    },
+    "EnvironmentBorder": {
+      "Light": "FF5649B0",
+      "Dark": "FF9184EE"
+    },
+    "EnvironmentBorderInactive": {
+      "Light": "FFADADAD",
+      "Dark": "FF454545"
+    },
+    "EnvironmentHeader": {
+      "Light": "FFF9F9F9",
+      "Dark": "FF282828"
+    },
+    "EnvironmentHeaderInactive": {
+      "Light": "FFF9F9F9",
+      "Dark": "FF282828"
+    },
+    "EnvironmentIndicator": {
+      "Light": "66757575",
+      "Dark": "66757575"
+    },
+    "EnvironmentLayeredBackground": {
+      "Light": "80FFFFFF",
+      "Dark": "4D3A3A3A"
+    },
+    "EnvironmentLayeredBorder": {
+      "Light": "0F000000",
+      "Dark": "80000000"
+    },
+    "EnvironmentLogo": {
+      "Light": "FF5649B0",
+      "Dark": "FF9184EE"
+    },
+    "EnvironmentTab": {
+      "Light": "FFF9F9F9",
+      "Dark": "FF282828"
+    },
+    "EnvironmentTabInactive": {
+      "Light": "FFF9F9F9",
+      "Dark": "FF282828"
+    },
+    "CaptionControlCloseFillPrimary": {
+      "Light": "FFC42B1C",
+      "Dark": "FFC42B1C"
+    },
+    "CaptionControlCloseFillSecondary": {
+      "Light": "E6C42B1C",
+      "Dark": "E6C42B1C"
+    },
+    "CaptionControlCloseTextFillPrimary": {
+      "Light": "FFFFFFFF",
+      "Dark": "FFFFFFFF"
+    },
+    "CaptionControlCloseTextFillSecondary": {
+      "Light": "B3FFFFFF",
+      "Dark": "B3FFFFFF"
+    },
+    "StatusBarBackgroundFillBuilding": {
+      "Light": "FF5649B0",
+      "Dark": "FF3F3682"
+    },
+    "StatusBarBackgroundFillDebugging": {
+      "Light": "FFBC4B09",
+      "Dark": "FF7A2101"
+    },
+    "StatusBarBackgroundFillRest": {
+      "Light": "8B000000",
+      "Dark": "4D000000"
+    },
+    "StatusBarBackgroundFillSolutionLoading": {
+      "Light": "FF005BA1",
+      "Dark": "FF003B6A"
+    },
+    "StatusBarControlFillSecondary": {
+      "Light": "33000000",
+      "Dark": "20FFFFFF"
+    },
+    "StatusBarTextFillBuilding": {
+      "Light": "FFFFFFFF",
+      "Dark": "FFFFFFFF"
+    },
+    "StatusBarTextFillDebugging": {
+      "Light": "FFFFFFFF",
+      "Dark": "FFFFFFFF"
+    },
+    "StatusBarTextFillDisabled": {
+      "Light": "90FFFFFF",
+      "Dark": "5DFFFFFF"
+    },
+    "StatusBarTextFillRest": {
+      "Light": "FFFFFFFF",
+      "Dark": "FFFFFFFF"
+    },
+    "StatusBarTextFillSolutionLoading": {
+      "Light": "FFFFFFFF",
+      "Dark": "FFFFFFFF"
+    }
+  }
+}

@@ -6,147 +6,125 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace ThemeConverter.ColorCompiler
+namespace ThemeConverter.ColorCompiler;
+
+/// <summary>
+/// Writes a ColorManager out to a pkgdef file.
+/// </summary>
+internal sealed class PkgDefWriter(ColorManager manager)
 {
-    /// <summary>
-    /// Writes a ColorManager out to a pkgdef file.
-    /// </summary>
-    internal class PkgDefWriter
+    public async Task SaveToFileAsync(string fileName, CancellationToken cancellationToken)
     {
-        private readonly ColorManager _colorManager;
+        EnsureDirectoryExists(Path.GetDirectoryName(fileName));
 
-        public PkgDefWriter(ColorManager manager)
+        await using PkgDefFileWriter writer = new(fileName, true);
+        await WriteRegistrationAsync(writer, cancellationToken);
+        await WriteThemesAsync(writer, cancellationToken);
+    }
+
+    private async Task WriteRegistrationAsync(PkgDefFileWriter writer, CancellationToken cancellationToken)
+    {
+        PkgDefItem item = new();
+        foreach (ColorTheme theme in manager.Themes)
         {
-            _colorManager = manager;
-        }
+            item.SectionName = string.Format(CultureInfo.InvariantCulture, @"$RootKey$\Themes\{0:B}", theme.ThemeId);
+            item.ValueDataType = PkgDefValueType.String;
 
-        public void SaveToFile(string fileName)
-        {
-            EnsureDirectoryExists(Path.GetDirectoryName(fileName));
+            item.ValueName = "@";
+            item.ValueDataString = theme.Name;
+            await writer.WriteAsync(item, cancellationToken);
 
-            using (PkgDefFileWriter writer = new PkgDefFileWriter(fileName, true))
+            item.ValueName = "Name";
+            item.ValueDataString = theme.Name;
+            await writer.WriteAsync(item, cancellationToken);
+
+            if (theme.FallbackId != Guid.Empty)
             {
-                WriterRegistration(writer);
-                WriterThemes(writer);
+                item.ValueName = nameof(theme.FallbackId);
+                item.ValueDataString = theme.FallbackId.ToString("B");
+                await writer.WriteAsync(item, cancellationToken);
             }
         }
+    }
 
-        private void WriterRegistration(PkgDefFileWriter writer)
+    private async Task WriteThemesAsync(PkgDefFileWriter writer, CancellationToken cancellationToken)
+    {
+        Dictionary<CategoryThemeKey, List<ColorEntry>> entries = [];
+
+        foreach (ColorEntry entry in manager.Themes.SelectMany(t => t.Colors))
         {
-            PkgDefItem item = new PkgDefItem();
-            foreach (ColorTheme theme in _colorManager.Themes)
+            CategoryThemeKey key = new(entry.Name.Category.Id, entry.Theme!.ThemeId);
+            if (!entries.TryGetValue(key, out List<ColorEntry>? keyEntries))
             {
-                if (theme.IsBuiltInTheme)
-                    continue;
-
-                item.SectionName = string.Format(CultureInfo.InvariantCulture, @"$RootKey$\Themes\{0:B}", theme.ThemeId);
-                item.ValueDataType = PkgDefValueType.PKGDEF_VALUE_STRING;
-
-                item.ValueName = "@";
-                item.ValueDataString = theme.Name;
-                writer.Write(item);
-
-                item.ValueName = "Name";
-                item.ValueDataString = theme.Name;
-                writer.Write(item);
-
-                if (theme.FallbackId != Guid.Empty)
-                {
-                    item.ValueName = nameof(theme.FallbackId);
-                    item.ValueDataString = theme.FallbackId.ToString("B");
-                    writer.Write(item);
-                }
-            }
-        }
-
-        private void WriterThemes(PkgDefFileWriter writer)
-        {
-            Dictionary<CategoryThemeKey, List<ColorEntry>> entries = new Dictionary<CategoryThemeKey, List<ColorEntry>>();
-
-            foreach (ColorEntry entry in _colorManager.Themes.SelectMany(t => t.Colors))
-            {
-                CategoryThemeKey key = new CategoryThemeKey(entry.Name.Category.Id, entry.Theme.ThemeId);
-                List<ColorEntry> keyEntries;
-                if (!entries.TryGetValue(key, out keyEntries))
-                {
-                    keyEntries = new List<ColorEntry>();
-                    entries[key] = keyEntries;
-                }
-
-                keyEntries.Add(entry);
+                keyEntries = [];
+                entries[key] = keyEntries;
             }
 
-            PkgDefItem item = new PkgDefItem();
-            item.ValueDataBinary = new byte[PkgDefConstants.MaxBinaryBlobSize];
-
-            foreach (KeyValuePair<CategoryThemeKey, List<ColorEntry>> unsavedSet in entries)
-            {
-                if (unsavedSet.Value.Any(e => !e.IsEmpty))
-                {
-                    ColorCategory category = _colorManager.CategoryIndex[unsavedSet.Key.Category];
-                    item.SectionName = string.Format(CultureInfo.InvariantCulture, @"$RootKey$\Themes\{0:B}\{1}", unsavedSet.Key.ThemeId, category.Name);
-                    item.ValueName = null;
-                    item.ValueDataType = PkgDefValueType.PKGDEF_VALUE_STRING;
-                    writer.Write(item);
-
-                    item.ValueName = "Data";
-                    item.ValueDataType = PkgDefValueType.PKGDEF_VALUE_BINARY;
-                    PopulateThemeCategoryInfo(ref item, category.Id, unsavedSet.Value);
-                    writer.Write(item);
-                }
-            }
+            keyEntries.Add(entry);
         }
 
-        private void EnsureDirectoryExists(string directory)
+        PkgDefItem item = new();
+
+        foreach (KeyValuePair<CategoryThemeKey, List<ColorEntry>> unsavedSet in entries)
         {
-            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-        }
+            ColorCategory category = manager.CategoryIndex[unsavedSet.Key.Category];
+            item.SectionName = string.Format(CultureInfo.InvariantCulture, @"$RootKey$\Themes\{0:B}\{1}",
+                unsavedSet.Key.ThemeId, category.Name);
+            item.ValueName = null;
+            item.ValueDataType = PkgDefValueType.String;
+            await writer.WriteAsync(item, cancellationToken);
 
-        private void PopulateThemeCategoryInfo(ref PkgDefItem item, Guid category, List<ColorEntry> colorEntries)
+            item.ValueName = "Data";
+            item.ValueDataType = PkgDefValueType.Binary;
+            PopulateThemeCategoryInfo(ref item, category.Id, unsavedSet.Value);
+            await writer.WriteAsync(item, cancellationToken);
+        }
+    }
+
+    private static void EnsureDirectoryExists(string? directory)
+    {
+        if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                using (VersionedBinaryWriter versionedWriter = new VersionedBinaryWriter(stream))
-                {
-                    CategoryCollectionRecord record = new CategoryCollectionRecord();
-
-                    CategoryRecord categoryRecord = new CategoryRecord(category);
-                    record.Categories.Add(categoryRecord);
-
-
-                    foreach (ColorEntry entry in colorEntries)
-                    {
-                        if (!entry.IsEmpty)
-                        {
-                            ColorRecord colorRecord = CreateColorRecord(entry);
-                            categoryRecord.Colors.Add(colorRecord);
-                        }
-                    }
-
-                    versionedWriter.WriteVersioned(PkgDefConstants.ExpectedVersion, (checkedWriter, version) =>
-                    {
-                        record.Write(checkedWriter);
-                    });
-                }
-
-                byte[] newBytes = stream.ToArray();
-                item.ValueDataBinaryLength = newBytes.Length;
-                newBytes.CopyTo(item.ValueDataBinary, 0);
-            }
+            Directory.CreateDirectory(directory);
         }
+    }
 
-        private ColorRecord CreateColorRecord(ColorEntry entry)
+    private static void PopulateThemeCategoryInfo(ref PkgDefItem item,
+                                                  Guid category,
+                                                  IEnumerable<ColorEntry> colorEntries)
+    {
+        using MemoryStream stream = new();
+        using (VersionedBinaryWriter versionedWriter = new(stream))
         {
-            ColorRecord colorRecord = new ColorRecord(entry.Name.Name);
-            colorRecord.BackgroundType = entry.BackgroundType;
-            colorRecord.Background = entry.BackgroundSource;
-            colorRecord.ForegroundType = entry.ForegroundType;
-            colorRecord.Foreground = entry.ForegroundSource;
-            return colorRecord;
+            CategoryCollectionRecord record = new();
+
+            CategoryRecord categoryRecord = new(category);
+            record.Categories.Add(categoryRecord);
+
+            foreach (ColorRecord colorRecord in colorEntries.Select(CreateColorRecord))
+            {
+                categoryRecord.Colors.Add(colorRecord);
+            }
+
+            versionedWriter.WriteVersioned(PkgDefConstants.ExpectedVersion,
+                (checkedWriter, _) => { record.Write(checkedWriter); });
         }
+
+        item.ValueDataBinary = stream.ToArray();
+    }
+
+    private static ColorRecord CreateColorRecord(ColorEntry entry)
+    {
+        ColorRecord colorRecord = new(entry.Name.Name)
+        {
+            BackgroundType = entry.BackgroundType,
+            Background = entry.BackgroundSource,
+            ForegroundType = entry.ForegroundType,
+            Foreground = entry.ForegroundSource
+        };
+        return colorRecord;
     }
 }

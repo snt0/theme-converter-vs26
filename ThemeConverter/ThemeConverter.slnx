@@ -1,0 +1,15 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="../.gitignore" />
+    <File Path="../.github/workflows/ci.yml" />
+    <File Path="../CODE_OF_CONDUCT.md" />
+    <File Path="../global.json" />
+    <File Path="../README.md" />
+  </Folder>
+  <Project DefaultStartup="true" Path="ThemeConverter/ThemeConverter.csproj" />
+  <Project Path="ThemeConverterTests/ThemeConverterTests.csproj" />
+</Solution>

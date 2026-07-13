@@ -4,77 +4,40 @@
 using System;
 using System.Collections.Generic;
 
-namespace ThemeConverter.ColorCompiler
+namespace ThemeConverter.ColorCompiler;
+
+internal sealed class ColorTheme(Guid themeId)
 {
-    internal class ColorTheme
+    public Guid ThemeId { get; private set; } = themeId;
+
+    public string? Name { get; set; }
+
+    public Guid FallbackId { get; set; }
+
+    public IList<ColorEntry> Colors
     {
-        private ColorEntryCollection _colors;
-        private Dictionary<ColorName, ColorEntry> _index;
+        get { return field ??= new ColorEntryCollection(this); }
+    }
 
-        public ColorTheme(Guid themeId)
+    public IDictionary<ColorName, ColorEntry> Index { get; } = new Dictionary<ColorName, ColorEntry>();
+
+    private sealed class ColorEntryCollection(ColorTheme theme) : OwnershipCollection<ColorEntry>
+    {
+        protected override void TakeOwnership(ColorEntry item)
         {
-            ThemeId = themeId;
-        }
-
-        public Guid ThemeId
-        {
-            get;
-            private set;
-        }
-
-        public bool IsBuiltInTheme
-        {
-            get;
-            set;
-        }
-
-        public string Name { get; set; }
-
-        public Guid FallbackId { get; set; }
-
-        public ColorManager Manager { get; set; }
-
-        public IList<ColorEntry> Colors
-        {
-            get
+            if (item.Theme != null)
             {
-                return _colors = _colors ?? new ColorEntryCollection(this);
-            }
-        }
-
-        public IDictionary<ColorName, ColorEntry> Index
-        {
-            get
-            {
-                return _index = _index ?? new Dictionary<ColorName, ColorEntry>();
-            }
-        }
-
-        class ColorEntryCollection : OwnershipCollection<ColorEntry>
-        {
-            private ColorTheme _theme;
-
-            public ColorEntryCollection(ColorTheme theme)
-            {
-                this._theme = theme;
+                throw new InvalidOperationException("Color entry can only belong to one theme");
             }
 
-            protected override void TakeOwnership(ColorEntry item)
-            {
-                if (item.Theme != null)
-                {
-                    throw new InvalidOperationException("Color entry can only belong to one theme");
-                }
+            item.Theme = theme;
+            theme.Index[item.Name] = item;
+        }
 
-                item.Theme = _theme;
-                _theme.Index[item.Name] = item;
-            }
-
-            protected override void LoseOwnership(ColorEntry item)
-            {
-                _theme.Index.Remove(item.Name);
-                item.Theme = null;
-            }
+        protected override void LoseOwnership(ColorEntry item)
+        {
+            theme.Index.Remove(item.Name);
+            item.Theme = null;
         }
     }
 }
