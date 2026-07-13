@@ -32,7 +32,7 @@ jobs:
       - run: dotnet pack ThemeConverter/ThemeConverter/ThemeConverter.csproj --configuration Release --no-build --output artifacts -p:Version=$env:PACKAGE_VERSION
       - run: dotnet tool install ThemeConverter.VS26 --add-source artifacts --tool-path .tool-smoke --version $env:PACKAGE_VERSION
       - run: .\.tool-smoke\theme-converter --help
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: NuGet-package
           path: artifacts/*.nupkg
@@ -45,14 +45,13 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: NuGet-package
-          path: artifacts
       - name: NuGet login (OIDC ? temp API key)
         uses: NuGet/login@v1
         id: login
         with:
           user: ${{ secrets.NUGET_USER }}
       - name: NuGet push
-        run: dotnet nuget push artifacts/*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push *.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
