@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Spectre.Console;
 using Xunit;
 
 namespace ThemeConverterTests;
@@ -76,11 +77,12 @@ public class CommandInterfaceTest
 
     private static async Task<CommandResult> RunAsync(params string[] arguments)
     {
+        // Disable ANSI for testing under conditions where they'd failt ests
+        AnsiConsole.Profile.Capabilities.Ansi = false;
+
         ProcessStartInfo startInfo = new(ExecutablePath)
         {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false
+            RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false
         };
         foreach (string argument in arguments)
         {
