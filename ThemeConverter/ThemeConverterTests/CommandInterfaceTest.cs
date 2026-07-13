@@ -77,8 +77,9 @@ public class CommandInterfaceTest
 
     private static async Task<CommandResult> RunAsync(params string[] arguments)
     {
-        // Disable ANSI for testing under conditions where they'd failt ests
+        // Disable ANSI for testing under conditions where they'd fail tests
         AnsiConsole.Profile.Capabilities.Ansi = false;
+        AnsiConsole.Console.Profile.Capabilities.ColorSystem = ColorSystem.NoColors;
 
         ProcessStartInfo startInfo = new(ExecutablePath)
         {
