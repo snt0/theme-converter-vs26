@@ -13,7 +13,7 @@ using Spectre.Console.Cli;
 
 namespace ThemeConverter;
 
-internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
+internal sealed class ConvertCommand(IAnsiConsole console) : AsyncCommand<ConvertCommand.Settings>
 {
     internal sealed class Settings : CommandSettings
     {
@@ -50,7 +50,7 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                                                     Settings settings,
                                                     CancellationToken cancellationToken)
     {
-        Converter.ValidateDataFiles(AnsiConsole.WriteLine);
+        Converter.ValidateDataFiles(console.WriteLine);
 
         string inputPath = settings.InputPath;
         string outputPath = settings.OutputPath ?? GetDirectoryName(inputPath);
@@ -64,9 +64,7 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         return Directory.Exists(path) ? path : Path.GetDirectoryName(path) ?? Directory.GetCurrentDirectory();
     }
 
-    private static async Task ConvertAsync(string sourcePath,
-                                           string pkgdefOutputPath,
-                                           CancellationToken cancellationToken)
+    private async Task ConvertAsync(string sourcePath, string pkgdefOutputPath, CancellationToken cancellationToken)
     {
         ICollection<string> sourceFiles = Directory.Exists(sourcePath)
             ?
@@ -83,11 +81,11 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
         foreach (string sourceFile in sourceFiles)
         {
-            AnsiConsole.MarkupLine($"Converting [blue]{Markup.Escape(sourceFile)}[/]");
-            AnsiConsole.WriteLine();
+            console.MarkupLine($"Converting [blue]{Markup.Escape(sourceFile)}[/]");
+            console.WriteLine();
 
             string pkgdefFilePath = await Converter.ConvertFileAsync(sourceFile, pkgdefOutputPath, cancellationToken);
-            AnsiConsole.MarkupLine($"Created [green]{Markup.Escape(pkgdefFilePath)}[/]");
+            console.MarkupLine($"Created [green]{Markup.Escape(pkgdefFilePath)}[/]");
         }
     }
 

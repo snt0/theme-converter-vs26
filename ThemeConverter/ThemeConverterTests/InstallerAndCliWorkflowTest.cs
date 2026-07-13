@@ -22,8 +22,10 @@ public class InstallerAndCliWorkflowTest
             string inputDirectory = Path.Combine(directory, "input");
             string outputDirectory = Path.Combine(directory, "output");
             Directory.CreateDirectory(inputDirectory);
-            await File.WriteAllTextAsync(Path.Combine(inputDirectory, "Dark.json"), "{ \"type\": \"dark\", \"colors\": {} }");
-            await File.WriteAllTextAsync(Path.Combine(inputDirectory, "Light.jsonc"), "{ \"type\": \"light\", \"colors\": {} }");
+            await File.WriteAllTextAsync(Path.Combine(inputDirectory, "Dark.json"),
+                "{ \"type\": \"dark\", \"colors\": {} }");
+            await File.WriteAllTextAsync(Path.Combine(inputDirectory, "Light.jsonc"),
+                "{ \"type\": \"light\", \"colors\": {} }");
             await File.WriteAllTextAsync(Path.Combine(inputDirectory, "ignored.txt"), "not a theme");
 
             int exitCode = await RunProgramAsync("convert", inputDirectory, "--output", outputDirectory);
@@ -35,7 +37,7 @@ public class InstallerAndCliWorkflowTest
         }
         finally
         {
-            Directory.Delete(directory, true);
+            await DeleteTemporaryDirectoryAsync(directory);
         }
     }
 
@@ -48,7 +50,8 @@ public class InstallerAndCliWorkflowTest
             string inputPath = Path.Combine(directory, "Sample.pkgdef");
             await File.WriteAllTextAsync(inputPath, "new theme");
             string visualStudioRoot = CreateVisualStudioLayout(directory);
-            string installedPath = Path.Combine(visualStudioRoot, "Common7", "IDE", "CommonExtensions", "Platform", "Sample.pkgdef");
+            string installedPath = Path.Combine(visualStudioRoot, "Common7", "IDE", "CommonExtensions", "Platform",
+                "Sample.pkgdef");
             await File.WriteAllTextAsync(installedPath, "old theme");
 
             int exitCode = await RunProgramAsync("install", inputPath, "--target-vs", visualStudioRoot, "--force");
@@ -58,7 +61,7 @@ public class InstallerAndCliWorkflowTest
         }
         finally
         {
-            Directory.Delete(directory, true);
+            await DeleteTemporaryDirectoryAsync(directory);
         }
     }
 
@@ -79,7 +82,7 @@ public class InstallerAndCliWorkflowTest
         }
         finally
         {
-            Directory.Delete(directory, true);
+            await DeleteTemporaryDirectoryAsync(directory);
         }
     }
 
@@ -97,6 +100,28 @@ public class InstallerAndCliWorkflowTest
         string directory = Path.Combine(Path.GetTempPath(), "ThemeConverterTests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         return directory;
+    }
+
+    private static async Task DeleteTemporaryDirectoryAsync(string directory)
+    {
+        const int maxAttempts = 5;
+
+        for (int attempt = 1;; attempt++)
+        {
+            try
+            {
+                Directory.Delete(directory, true);
+                return;
+            }
+            catch (UnauthorizedAccessException) when (attempt < maxAttempts)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100 * attempt));
+            }
+            catch (IOException) when (attempt < maxAttempts)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100 * attempt));
+            }
+        }
     }
 
     private static Task<int> RunProgramAsync(params string[] arguments)

@@ -13,7 +13,7 @@ using Spectre.Console.Cli;
 
 namespace ThemeConverter;
 
-internal sealed class InstallCommand : AsyncCommand<InstallCommand.Settings>
+internal sealed class InstallCommand(IAnsiConsole console) : AsyncCommand<InstallCommand.Settings>
 {
     internal sealed class Settings : CommandSettings
     {
@@ -77,7 +77,7 @@ internal sealed class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
         foreach (string installedFile in installedFiles)
         {
-            AnsiConsole.MarkupLine($"Installed [green]{Markup.Escape(installedFile)}[/]");
+            console.MarkupLine($"Installed [green]{Markup.Escape(installedFile)}[/]");
         }
 
         return 0;
