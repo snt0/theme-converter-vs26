@@ -2,23 +2,21 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Spectre.Console;
+using Spectre.Console.Cli.Testing;
+using ThemeConverter;
 using Xunit;
 
 namespace ThemeConverterTests;
 
 public class CommandInterfaceTest
 {
-    private static readonly string ExecutablePath = Path.Combine(AppContext.BaseDirectory, "ThemeConverter.exe");
-
     [Fact]
-    public async Task RootHelp_ListsSeparateWorkflows()
+    public void RootHelp_ListsSeparateWorkflows()
     {
-        CommandResult result = await RunAsync("--help");
+        CommandAppResult result = Run("--help");
 
         result.ExitCode.Should().Be(0);
         result.Output.Should().Contain("convert <INPUT>");
@@ -35,7 +33,7 @@ public class CommandInterfaceTest
             string outputPath = Path.Combine(directory, "output");
             await File.WriteAllTextAsync(inputPath, "{ \"type\": \"dark\", \"colors\": {} }");
 
-            CommandResult result = await RunAsync("convert", inputPath, "--output", outputPath);
+            CommandAppResult result = Run("convert", inputPath, "--output", outputPath);
 
             result.ExitCode.Should().Be(0, result.Output);
             File.Exists(Path.Combine(outputPath, "Sample.pkgdef")).Should().BeTrue();
@@ -63,7 +61,7 @@ public class CommandInterfaceTest
             await File.WriteAllTextAsync(Path.Combine(ideDirectory, "devenv.exe"), string.Empty);
             await File.WriteAllTextAsync(Path.Combine(themeDirectory, "Sample.pkgdef"), "existing");
 
-            CommandResult result = await RunAsync("install", inputPath, "--target-vs", visualStudioRoot);
+            CommandAppResult result = Run("install", inputPath, "--target-vs", visualStudioRoot);
 
             result.ExitCode.Should().NotBe(0);
             result.Output.Should().Contain("--force");
@@ -75,27 +73,11 @@ public class CommandInterfaceTest
         }
     }
 
-    private static async Task<CommandResult> RunAsync(params string[] arguments)
+    private static CommandAppResult Run(params string[] arguments)
     {
-        // Disable ANSI for testing under conditions where they'd fail tests
-        AnsiConsole.Profile.Capabilities.Ansi = false;
-        AnsiConsole.Console.Profile.Capabilities.ColorSystem = ColorSystem.NoColors;
-
-        ProcessStartInfo startInfo = new(ExecutablePath)
-        {
-            RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false
-        };
-        foreach (string argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        using Process process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start CLI.");
-        Task<string> standardOutput = process.StandardOutput.ReadToEndAsync();
-        Task<string> standardError = process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
-
-        return new CommandResult(process.ExitCode, await standardOutput + await standardError);
+        CommandAppTester app = new();
+        app.Configure(Program.Configure);
+        return app.Run(arguments);
     }
 
     private static string CreateTemporaryDirectory()
@@ -104,6 +86,4 @@ public class CommandInterfaceTest
         Directory.CreateDirectory(directory);
         return directory;
     }
-
-    private sealed record CommandResult(int ExitCode, string Output);
 }
